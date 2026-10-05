@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maidu text with synchronized audio</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font: 1.125rem/1.7 Georgia, "Iowan Old Style", serif;
+    max-width: 46rem;
+    margin: 2rem auto;
+    padding: 0 1.25rem;
+    color: #1a1a1a;
+    background: #fafafa;
+  }
+  h1 { font-size: 1.5rem; margin-bottom: .25rem; }
+  p.meta { color: #555; margin-top: 0; font-size: .95rem; }
+  audio { display: none; }
+  #player {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fafafa;
+    padding: .5rem 0;
+    margin: 0 -1.25rem 1.5rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    border-bottom: 1px solid #ddd;
+  }
+  #waveform { margin-bottom: .5rem; }
+  #controls {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+  }
+  #play-btn {
+    width: 2.25rem;
+    height: 2.25rem;
+    border: none;
+    border-radius: 50%;
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  #play-btn:hover { background: #444; }
+  #time { font-size: .85rem; color: #555; font-family: monospace; }
+  @media (prefers-color-scheme: dark) {
+    #player { background: #121212; border-bottom-color: #2e2e2e; }
+    #play-btn { background: #eee; color: #111; }
+    #play-btn:hover { background: #ccc; }
+    #time { color: #aaa; }
+  }
+  .tt-transcript .tt-phrase {
+    display: block;
+    padding: .35rem .5rem;
+    border-radius: .25rem;
+    cursor: pointer;
+    transition: background-color .15s ease;
+    scroll-margin-top: 9rem;
+  }
+  .tt-transcript .tt-phrase:hover { background: #ececec; }
+  .tt-transcript .tt-phrase:focus-visible {
+    outline: 3px solid #0b5fff;
+    outline-offset: 2px;
+  }
+  .tt-transcript .tt-current-phrase {
+    background: #fff3a3;
+    color: #1a1a1a;
+  }
+  @media (prefers-color-scheme: dark) {
+    body { color: #eee; background: #121212; }
+    p.meta { color: #aaa; }
+    .tt-transcript .tt-phrase:hover { background: #2a2a2a; }
+    .tt-transcript .tt-current-phrase { background: #6b5a00; color: #fff; }
+  }
+</style>
+</head>
+<body>
+  <h1>Maidu narrative — LA30_041_001</h1>
+  <p>This is a test. The audio is from <a href="https://cla.berkeley.edu/item/?bndlid=18156=Narrative%20of,%20%22when%20the%20white%20men%20came%22">The California Language Archive.</a></p>
+  <p class="meta">Click any line to jump the audio there. The current phrase is highlighted as it plays.</p>
+
+  <audio id="tt-audio" preload="metadata" src="LA30_041_001.wav">
+    <track kind="metadata" src="alignment.vtt" label="Phrase timing">
+  </audio>
+
+  <div id="player">
+    <div id="waveform"></div>
+    <div id="controls">
+      <button id="play-btn" aria-label="Play">&#9654;</button>
+      <span id="time">0:00 / 0:00</span>
+    </div>
+  </div>
+
+  <div class="tt-transcript" lang="nmu" data-tt-media-urls="LA30_041_001.wav">
+      <span class="tt-phrase">Wólem májdym uním k'ódo 'ymítdom,</span>
+      <span class="tt-phrase">'Ínjanà wi'ípem k'ódojdì k'ódom'Íynnan,</span>
+      <span class="tt-phrase">momím jymmotòpem kíwnan 'ysítopindom,</span>
+      <span class="tt-phrase">'uním k'ódo 'ymítwonòm</span>
+      <span class="tt-phrase">'Adóm 'uním k'ódo 'ékdadòjkynan,</span>
+      <span class="tt-phrase">'yc'ópindom, 'yc'ópindom,</span>
+      <span class="tt-phrase">kak'án 'uním k'ódo'éswomìtdom.</span>
+      <span class="tt-phrase">'Adóm 'Ínjanàm májdym kawónom</span>
+      <span class="tt-phrase">'uním k'ódi bíspem.</span>
+      <span class="tt-phrase">'Ínjanàm.</span>
+      <span class="tt-phrase">'Amá, wóham hadójpem kalétani 'ymítdom,</span>
+      <span class="tt-phrase">'amá 'Ínjanàm, jawídom,</span>
+      <span class="tt-phrase">immigrant 'awónom.</span>
+      <span class="tt-phrase">'Amám, 'ysítopindom 'uním k'ódo,</span>
+      <span class="tt-phrase">Hanílèkim Kojóm 'ysíto</span>
+      <span class="tt-phrase">Smoke Creek Nevadadi ysítopindom,</span>
+      <span class="tt-phrase">bó jawónom kak'án.</span>
+      <span class="tt-phrase">Bóm.</span>
+      <span class="tt-phrase">'Ánt'ytyt'ym 'ó wokít 'ynódom,</span>
+      <span class="tt-phrase">hanysitopìnwonom.</span>
+      <span class="tt-phrase">Kak'án wowókinùpem 'ac'éki.</span>
+      <span class="tt-phrase">'Amá kak'ás c'ewónom.</span>
+      <span class="tt-phrase">'Amám, 'yc'ópindom,</span>
+      <span class="tt-phrase">Smoke Creek di 'yc'ópindom,</span>
+      <span class="tt-phrase">'óm jamáni 'ysítopindom,</span>
+      <span class="tt-phrase">Podápem K'ódojdi,</span>
+      <span class="tt-phrase">Wipúppùm K'ódojdi 'yc'ópinwonom,</span>
+      <span class="tt-phrase">Hanílèkim Kojóna 'éswomìtdom.</span>
+      <span class="tt-phrase">'Amá, mín k'a'ájk'asì.</span>
+      <span class="tt-phrase">C'àjìm wónom májdym</span>
+      <span class="tt-phrase">nìk'í hònwe pínjahàmyni,</span>
+      <span class="tt-phrase">mín japájtodom.</span>
+      <span class="tt-phrase">'Amám, 'ypìndom,</span>
+      <span class="tt-phrase">'uním sèwí, 'uním betém séwwonpinì,</span>
+      <span class="tt-phrase">'uním nák'am k'ódonan 'yc'ópindom,</span>
+      <span class="tt-phrase">'uním sèwí 'ynnowònom.</span>
+      <span class="tt-phrase">'Adóm 'ódo hatámwonòm, 'ódo bádom.</span>
+      <span class="tt-phrase">'Amyni, 'Ínjanàm tawáltiwònom Wóle.</span>
+      <span class="tt-phrase">Hójjam Wóle.</span>
+      <span class="tt-phrase">'Adóm Wólem uním k'ódo ymítwonom.</span>
+      <span class="tt-phrase">'Adóm uním k'ódo ýpinwonom.</span>
+      <span class="tt-phrase">Uním jamánim ýnno,</span>
+      <span class="tt-phrase">sewí ýpinwonom.</span>
+      <span class="tt-phrase">Amádi mac'ój'am:</span>
+      <span class="tt-phrase">méjtom hybó kywónom.</span>
+      <span class="tt-phrase">C'í, damísa sélwonom.</span>
+      <span class="tt-phrase">Amádi mac'ój'am:</span>
+      <span class="tt-phrase">nikbék'ym, tawáljat'an ypíndom;</span>
+      <span class="tt-phrase">'ódom dúki, ándykbe ma'at, 'ájk'ate,</span>
+      <span class="tt-phrase">maha'okitdom nikbék'yjat'am.</span>
+      <span class="tt-phrase">Amýni, mym 'ódom dúki Wóle c'etíwonom</span>
+      <span class="tt-phrase">Amýni mac'ój'am:</span>
+      <span class="tt-phrase">méjdom Wólem, istówakypem Wólem,</span>
+      <span class="tt-phrase">jalálapdojdom,</span>
+      <span class="tt-phrase">sýttim kamísa hápdawweten,</span>
+      <span class="tt-phrase">ódom dúkini.</span>
+      <span class="tt-phrase">Awónom kak'án nikbewk'yjat'am.</span>
+      <span class="tt-phrase">Amám uním sewí tawál ýpnnowonom,</span>
+      <span class="tt-phrase">Adóm, nikbewk'yjat'am.</span>
+      <span class="tt-phrase">Amám kíwnan c'ajím májdym yc'ópinwonom,</span>
+      <span class="tt-phrase">Pámwilim májdym.</span>
+      <span class="tt-phrase">Amádi kak'án, nikbewk'yjat'am tawálwonom.</span>
+      <span class="tt-phrase">Adóm nikbewk'yjat'am Pánwylim wéje mákkitwonom.</span>
+      <span class="tt-phrase">Adóm pack train ak'án nikbewk'yjat'am.</span>
+      <span class="tt-phrase">K'a'aj ky'ým ma'ám.</span>
+      <span class="tt-phrase">Pack train, pack animal ka'ájk'an.</span>
+      <span class="tt-phrase">Ka'ájk'as, wéjedom.</span>
+      <span class="tt-phrase">Wóleni wéjec'yjdom, is kinda tangled up ak'án Wólem.</span>
+      <span class="tt-phrase">Amýni, Ínjanani ka'ájk'as, wéjedom.</span>
+      <span class="tt-phrase">Uním séwbonpinim,</span>
+      <span class="tt-phrase">Cariboum sewím piní,</span>
+      <span class="tt-phrase">Sájnem májdym ódo tawálwonom</span>
+      <span class="tt-phrase">Syhýlim séwdi.</span>
+      <span class="tt-phrase">Obýnodi unídi,</span>
+      <span class="tt-phrase">ódo tawáldom,</span>
+      <span class="tt-phrase">sewí luk'ú píkno tawáldom,</span>
+      <span class="tt-phrase">ó unína wulútdojwonom.</span>
+      <span class="tt-phrase">Amýni, mac'ój'am: líjani, ódo pí hýjewonom.</span>
+      <span class="tt-phrase">Adóm mac'ój'am: tawál'ysipwonom.</span>
+      <span class="tt-phrase">Adóm uním séwno momí kutídom,</span>
+      <span class="tt-phrase">t'úc'ikdom sewí,</span>
+      <span class="tt-phrase">ódo tawálwonom,</span>
+      <span class="tt-phrase">wájodom,</span>
+      <span class="tt-phrase">pulúmna wájodom,</span>
+      <span class="tt-phrase">wájodom.</span>
+      <span class="tt-phrase">Sájnem májdym.</span>
+      <span class="tt-phrase">Adóm uním sewí tawál'ýnnowónom, mac'ój'am.</span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/gh/samuelbradshaw/transcript-tracer-js@main/transcript-tracer.js"></script>
+  <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
+  <script>
+    loadTranscriptTracer({
+      alignmentFuzziness: 3,
+      autoScroll: 'phrase',
+      clickable: true,
+    });
+
+    const audio = document.getElementById('tt-audio');
+
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const ws = WaveSurfer.create({
+      container: '#waveform',
+      waveColor: prefersDark ? '#888' : '#bbb',
+      progressColor: prefersDark ? '#ddd' : '#1a1a1a',
+      cursorColor: prefersDark ? '#fff' : '#1a1a1a',
+      cursorWidth: 2,
+      height: 64,
+      normalize: true,
+      media: audio,
+      barWidth: 2,
+      barRadius: 2,
+    });
+
+    const playBtn = document.getElementById('play-btn');
+    const timeEl  = document.getElementById('time');
+
+    function fmt(s) {
+      const m = Math.floor(s / 60);
+      return m + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+    }
+
+    ws.on('ready', (dur) => {
+      timeEl.textContent = '0:00 / ' + fmt(dur);
+    });
+
+    ws.on('timeupdate', (t) => {
+      timeEl.textContent = fmt(t) + ' / ' + fmt(ws.getDuration());
+    });
+
+    ws.on('play',  () => { playBtn.innerHTML = '&#9646;&#9646;'; playBtn.setAttribute('aria-label', 'Pause'); });
+    ws.on('pause', () => { playBtn.innerHTML = '&#9654;';        playBtn.setAttribute('aria-label', 'Play');  });
+    ws.on('finish',() => { playBtn.innerHTML = '&#9654;';        playBtn.setAttribute('aria-label', 'Play');  });
+
+    playBtn.addEventListener('click', () => ws.playPause());
+  </script>
+</body>
+</html>

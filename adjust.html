@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maidu timing adjustment — LA30_041_001</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font: 1.125rem/1.7 Georgia, "Iowan Old Style", serif;
+    max-width: 46rem;
+    margin: 2rem auto;
+    padding: 0 1.25rem;
+    color: #1a1a1a;
+    background: #fafafa;
+  }
+  h1 { font-size: 1.5rem; margin-bottom: .25rem; }
+  p.meta { color: #555; margin-top: 0; font-size: .95rem; }
+  audio { width: 100%; margin: 1rem 0 1rem; }
+
+  /* ── Toolbar ──────────────────────────────────────────────────────── */
+
+  #toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .4rem .6rem;
+    padding: .5rem .6rem;
+    margin-bottom: 1.25rem;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: .3rem;
+    font-size: .8rem;
+    color: #444;
+  }
+  #current-time {
+    font-family: "Courier New", monospace;
+    font-size: .8rem;
+    color: #333;
+    margin-right: .25rem;
+  }
+  #toolbar label {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+  }
+  #shift-input {
+    width: 4.5rem;
+    font-size: .8rem;
+    padding: .15rem .3rem;
+    border: 1px solid #bbb;
+    border-radius: .2rem;
+    background: #fff;
+  }
+  .tb-sep { color: #ccc; user-select: none; }
+  .tb-btn {
+    font-size: .78rem;
+    padding: .2rem .55rem;
+    background: #e2e2e2;
+    border: 1px solid #bbb;
+    border-radius: .2rem;
+    cursor: pointer;
+    white-space: nowrap;
+    line-height: 1.4;
+  }
+  .tb-btn:hover { background: #d6d6d6; }
+  #status-msg {
+    font-size: .75rem;
+    color: #888;
+    font-style: italic;
+    min-width: 8rem;
+  }
+
+  /* ── Phrase rows ──────────────────────────────────────────────────── */
+
+  .tt-transcript { margin-top: .5rem; }
+
+  .phrase-row {
+    padding: .35rem .5rem;
+    border-radius: .25rem;
+    transition: background-color .15s ease;
+  }
+  .phrase-row:hover { background: #ececec; }
+  .phrase-row.is-current {
+    background: #fff3a3;
+    color: #1a1a1a;
+  }
+
+  .phrase-text {
+    display: block;
+    cursor: pointer;
+  }
+
+  .phrase-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .25rem .4rem;
+    margin-top: .15rem;
+  }
+
+  input.time-inp {
+    font-family: "Courier New", Courier, monospace;
+    font-size: .72rem;
+    width: 7.8rem;
+    padding: .1rem .3rem;
+    border: 1px solid #ccc;
+    border-radius: .2rem;
+    background: #fff;
+    color: #222;
+    transition: border-color .15s;
+  }
+  input.time-inp:focus { outline: 2px solid #0b5fff88; outline-offset: 1px; }
+  input.time-inp.invalid { border-color: #c00; background: #fff5f5; }
+
+  .time-arrow {
+    font-size: .7rem;
+    color: #999;
+    user-select: none;
+  }
+
+  .ph-btn {
+    font-size: .7rem;
+    padding: .1rem .4rem;
+    background: #e8e8e8;
+    border: 1px solid #bbb;
+    border-radius: .2rem;
+    cursor: pointer;
+    white-space: nowrap;
+    line-height: 1.5;
+  }
+  .ph-btn:hover { background: #ddd; }
+  .ph-btn.seek-btn {
+    background: #e8eeff;
+    border-color: #99aaee;
+    color: #2244cc;
+  }
+  .ph-btn.seek-btn:hover { background: #dde5ff; }
+
+  @keyframes flash-row {
+    0%   { outline: 2px solid #0b5fff; }
+    70%  { outline: 2px solid #0b5fff; }
+    100% { outline: none; }
+  }
+  .flash { animation: flash-row .6s ease forwards; }
+
+  /* ── Dark mode ────────────────────────────────────────────────────── */
+
+  @media (prefers-color-scheme: dark) {
+    body { color: #eee; background: #121212; }
+    p.meta { color: #aaa; }
+    #toolbar {
+      background: #1c1c1c;
+      border-color: #333;
+      color: #aaa;
+    }
+    #current-time { color: #ccc; }
+    #shift-input {
+      background: #1a1a1a;
+      color: #eee;
+      border-color: #444;
+    }
+    .tb-btn { background: #2a2a2a; border-color: #444; color: #ddd; }
+    .tb-btn:hover { background: #333; }
+    .phrase-row:hover { background: #1e1e1e; }
+    .phrase-row.is-current { background: #6b5a00; color: #fff; }
+    input.time-inp { background: #1a1a1a; color: #ddd; border-color: #444; }
+    input.time-inp.invalid { background: #2a0000; border-color: #c00; }
+    .ph-btn { background: #252525; border-color: #444; color: #ddd; }
+    .ph-btn:hover { background: #303030; }
+    .ph-btn.seek-btn { background: #1a2040; border-color: #3355aa; color: #99bbff; }
+    .ph-btn.seek-btn:hover { background: #1f2850; }
+  }
+  #player {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fafafa;
+    padding: .5rem 0;
+    margin: 0 -1.25rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    border-bottom: 1px solid #ddd;
+  }
+  @media (prefers-color-scheme: dark) {
+    #player { background: #121212; border-bottom-color: #2e2e2e; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Maidu narrative — LA30_041_001 <small style="font-size:.9rem;font-weight:normal;color:#888">(timing adjustment)</small></h1>
+<p>Audio from <a href="https://cla.berkeley.edu/item/?bndlid=18156">The California Language Archive</a>. <a href="index.html">← View presentation</a></p>
+<p class="meta">Edit the timestamps next to each phrase, or click <strong>Mark Start</strong> / <strong>Mark End</strong> while the audio plays to capture the current position. Download the revised VTT when done.</p>
+<div id="player">
+  <audio id="audio" controls preload="metadata" src="LA30_041_001.wav"></audio>
+</div>
+<div id="toolbar">
+  <span>Now: <span id="current-time">00:00:00.000</span></span>
+  <span class="tb-sep">|</span>
+  <label>
+    Shift all by
+    <input type="number" id="shift-input" value="0" step="0.1"> s
+  </label>
+  <button class="tb-btn" id="apply-shift-btn">Apply Shift</button>
+  <span class="tb-sep">|</span>
+  <button class="tb-btn" id="download-btn">⬇ Download VTT</button>
+  <button class="tb-btn" id="reset-btn">Reset</button>
+  <span id="status-msg"></span>
+</div>
+
+<div class="tt-transcript" lang="nmu" id="transcript"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  const audio       = document.getElementById('audio');
+  const transcript  = document.getElementById('transcript');
+  const currentTime = document.getElementById('current-time');
+  const statusMsg   = document.getElementById('status-msg');
+
+  let originalVTT = '';
+  let cues = [];
+  let activeRow = null;
+  let statusTimer = null;
+  const AUDIO_SRC = 'LA30_041_001.wav';
+
+  // ── Time helpers ────────────────────────────────────────────────────
+
+  function parseSec(str) {
+    str = String(str || '').trim();
+    const parts = str.split(':');
+    if (parts.length === 3) {
+      return parseFloat(parts[0]) * 3600
+           + parseFloat(parts[1]) * 60
+           + parseFloat(parts[2]);
+    }
+    if (parts.length === 2) {
+      return parseFloat(parts[0]) * 60 + parseFloat(parts[1]);
+    }
+    return parseFloat(str);
+  }
+
+  function fmtTime(sec) {
+    if (!isFinite(sec) || sec < 0) sec = 0;
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = (sec % 60).toFixed(3).padStart(6, '0');
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${s}`;
+  }
+
+  // ── VTT parser ──────────────────────────────────────────────────────
+
+  function parseVTT(text) {
+    const result = [];
+    const lines = text.split('\n');
+    let i = 0;
+    while (i < lines.length && !lines[i].startsWith('WEBVTT')) i++;
+    i++;
+    while (i < lines.length) {
+      while (i < lines.length && lines[i].trim() === '') i++;
+      if (i >= lines.length) break;
+      let id = '';
+      if (!lines[i].includes('-->')) { id = lines[i].trim(); i++; }
+      if (i >= lines.length || !lines[i].includes('-->')) { i++; continue; }
+      const timingLine = lines[i]; i++;
+      const arrow = timingLine.indexOf('-->');
+      const startStr = timingLine.slice(0, arrow).trim();
+      const endStr   = timingLine.slice(arrow + 3).trim().split(/\s/)[0];
+      const textLines = [];
+      while (i < lines.length && lines[i].trim() !== '') { textLines.push(lines[i]); i++; }
+      result.push({
+        id:    id || String(result.length + 1),
+        start: parseSec(startStr),
+        end:   parseSec(endStr),
+        text:  textLines.join('\n').trim(),
+      });
+    }
+    return result;
+  }
+
+  // ── VTT generator ───────────────────────────────────────────────────
+
+  function buildVTT() {
+    let out = 'WEBVTT\n\n';
+    const rows = transcript.querySelectorAll('.phrase-row');
+    cues.forEach((cue, i) => {
+      const row = rows[i];
+      const start = parseSec(row.querySelector('.start-inp').value);
+      const end   = parseSec(row.querySelector('.end-inp').value);
+      out += `${cue.id}\n${fmtTime(start)} --> ${fmtTime(end)}\n${cue.text}\n\n`;
+    });
+    return out;
+  }
+
+  // ── Rendering ───────────────────────────────────────────────────────
+
+  function makeInput(cls, sec) {
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = `time-inp ${cls}`;
+    inp.value = fmtTime(sec);
+    inp.spellcheck = false;
+    inp.autocomplete = 'off';
+    inp.setAttribute('aria-label', cls === 'start-inp' ? 'Start time' : 'End time');
+    inp.addEventListener('blur', () => {
+      const v = parseSec(inp.value);
+      if (isNaN(v)) {
+        inp.classList.add('invalid');
+      } else {
+        inp.classList.remove('invalid');
+        inp.value = fmtTime(v);
+      }
+    });
+    return inp;
+  }
+
+  function makeBtn(label, title, extraClass, handler) {
+    const btn = document.createElement('button');
+    btn.textContent = label;
+    btn.title = title;
+    btn.className = `ph-btn${extraClass ? ' ' + extraClass : ''}`;
+    btn.addEventListener('click', handler);
+    return btn;
+  }
+
+  function renderTranscript() {
+    transcript.innerHTML = '';
+    activeRow = null;
+
+    cues.forEach((cue) => {
+      const row = document.createElement('div');
+      row.className = 'phrase-row';
+
+      // clickable phrase text
+      const textSpan = document.createElement('span');
+      textSpan.className = 'phrase-text';
+      textSpan.setAttribute('lang', 'nmu');
+      textSpan.textContent = cue.text;
+      textSpan.addEventListener('click', () => {
+        const t = parseSec(row.querySelector('.start-inp').value);
+        if (isFinite(t)) { 
+          audio.src = `${AUDIO_SRC}#t=${t}`; 
+          audio.play(); 
+           setTimeout(() => {
+            scrollRowIntoView(row);
+            row.querySelector('.seek-btn').focus();
+          }, 0);
+        }
+      });
+      row.appendChild(textSpan);
+
+      // timing controls
+      const controls = document.createElement('div');
+      controls.className = 'phrase-controls';
+
+      const startInp = makeInput('start-inp', cue.start);
+      const arrow    = document.createElement('span');
+      arrow.className = 'time-arrow';
+      arrow.textContent = '→';
+      arrow.setAttribute('aria-hidden', 'true');
+      const endInp = makeInput('end-inp', cue.end);
+
+      // cascade: if new end time overlaps the next row's start, push it forward
+      endInp.addEventListener('blur', () => {
+        const thisEnd = parseSec(endInp.value);
+        if (!isFinite(thisEnd)) return;
+        const nextRow = row.nextElementSibling;
+        if (!nextRow) return;
+        const nextStart = nextRow.querySelector('.start-inp');
+        if (parseSec(nextStart.value) < thisEnd) {
+          nextStart.value = fmtTime(thisEnd);
+          nextStart.classList.remove('invalid');
+          flashRow(nextRow);
+        }
+      });
+
+      controls.appendChild(startInp);
+      controls.appendChild(arrow);
+      controls.appendChild(endInp);
+
+      controls.appendChild(makeBtn('▶ Seek', 'Play this cue and stop at its end time', 'seek-btn', () => {
+        const t   = parseSec(startInp.value);
+        const end = parseSec(endInp.value);
+        if (isFinite(t)) {
+          audio.src = `${AUDIO_SRC}#t=${t},${isFinite(end) && end > t ? end : ''}`;
+          audio.play();
+          //keep focus on this phrase-row
+          setTimeout(() => {
+            scrollRowIntoView(row);
+            row.querySelector('.seek-btn').focus();
+          }, 0);
+
+        }
+      }));
+
+      controls.appendChild(makeBtn('Mark Start', 'Set start time to current audio position', null, () => {
+        startInp.value = fmtTime(audio.currentTime);
+        startInp.classList.remove('invalid');
+        flashRow(row);
+      }));
+
+      controls.appendChild(makeBtn('Mark End', 'Set end time to current audio position', null, () => {
+        endInp.value = fmtTime(audio.currentTime);
+        endInp.classList.remove('invalid');
+        flashRow(row);
+      }));
+
+      row.appendChild(controls);
+      transcript.appendChild(row);
+    });
+  }
+
+  function scrollRowIntoView(row) {
+    //console.log('scrollRowIntoView', { row });
+    const playerBottom = document.getElementById('player').getBoundingClientRect().bottom;
+    const rowTop = row.getBoundingClientRect().top;
+    //console.log('scrolling', { playerBottom, rowTop });
+    if (rowTop > playerBottom + 4) {
+      //console.log('scrolling', { playerBottom, rowTop });
+      window.scrollBy({ top: rowTop - playerBottom - 8, behavior: 'smooth' });
+    }
+  }
+
+  function flashRow(row) {
+    row.classList.remove('flash');
+    void row.offsetWidth;
+    row.classList.add('flash');
+  }
+
+  // ── Playback sync ───────────────────────────────────────────────────
+
+  audio.addEventListener('timeupdate', () => {
+    const t = audio.currentTime;
+    currentTime.textContent = fmtTime(t);
+
+    let found = null;
+    const rows = transcript.querySelectorAll('.phrase-row');
+    for (const row of rows) {
+      const start = parseSec(row.querySelector('.start-inp').value);
+      const end   = parseSec(row.querySelector('.end-inp').value);
+      if (t >= start && t < end) { found = row; break; }
+    }
+
+    if (found !== activeRow) {
+      if (activeRow) activeRow.classList.remove('is-current');
+      activeRow = found;
+      if (found) {
+        found.classList.add('is-current');
+        scrollRowIntoView(found);
+      }
+    }
+  });
+
+  // ── Spacebar play / pause ───────────────────────────────────────────
+
+  document.addEventListener('keydown', (e) => {
+    if (e.code !== 'Space') return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+    if (audio.paused) { audio.play(); } else { audio.pause(); }
+  });
+
+  // ── Toolbar actions ─────────────────────────────────────────────────
+
+  document.getElementById('apply-shift-btn').addEventListener('click', () => {
+    const delta = parseFloat(document.getElementById('shift-input').value);
+    if (!isFinite(delta) || delta === 0) return;
+    for (const row of transcript.querySelectorAll('.phrase-row')) {
+      const si = row.querySelector('.start-inp');
+      const ei = row.querySelector('.end-inp');
+      si.value = fmtTime(Math.max(0, parseSec(si.value) + delta));
+      ei.value = fmtTime(Math.max(0, parseSec(ei.value) + delta));
+      si.classList.remove('invalid');
+      ei.classList.remove('invalid');
+    }
+    showStatus(`Shifted all ${cues.length} cues by ${delta > 0 ? '+' : ''}${delta}s`);
+  });
+
+  document.getElementById('download-btn').addEventListener('click', () => {
+    const vtt  = buildVTT();
+    const blob = new Blob([vtt], { type: 'text/vtt;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = 'alignment.vtt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showStatus('alignment.vtt downloaded');
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    if (!confirm('Reset all timing to the original loaded file?')) return;
+    cues = parseVTT(originalVTT);
+    renderTranscript();
+    showStatus('Reset to original');
+  });
+
+  function showStatus(msg) {
+    statusMsg.textContent = msg;
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(() => { statusMsg.textContent = ''; }, 3500);
+  }
+
+  // ── Bootstrap ───────────────────────────────────────────────────────
+
+  fetch('alignment.vtt')
+    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
+    .then(text => {
+      originalVTT = text;
+      cues = parseVTT(text);
+      renderTranscript();
+      showStatus(`${cues.length} cues loaded`);
+    })
+    .catch(err => {
+      transcript.innerHTML =
+        `<p style="color:#c00;padding:.5rem 0">Could not load alignment.vtt — ${err.message}.<br>
+         Serve this file through a local web server (not file://).</p>`;
+    });
+
+})();
+</script>
+</body>
+</html>
